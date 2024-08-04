@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.gson.Gson
 import com.netanel.adscarrouselcompose.model.Links
+import com.netanel.adscarrouselcompose.ui.composables.AnimatedCarousel
 import com.netanel.adscarrouselcompose.ui.theme.AdsCarrouselComposeTheme
 import java.io.InputStreamReader
 
@@ -34,8 +35,8 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
 //                    DisplayLinks()
-                    Carousel(links = loadJsonFromFile(context, "links.json"))
-//                    AnimatedCarousel(links = loadJsonFromFile(context, "links.json"))
+//                    Carousel(links = loadJsonFromFile(context, "links.json"))
+                    AnimatedCarousel(links = loadJsonFromFile(context, "links.json"))
                 }
             }
         }
@@ -57,27 +58,23 @@ fun DisplayLinks() {
     val context = LocalContext.current
     val links = loadJsonFromFile(context, "links.json")
 
-    if (links != null) {
-        Column {
-            links.videoLinks.forEach { videoLink ->
-                Text(
-                    text = videoLink,
-                    modifier = Modifier.clickable {
-                        // Handle click
-                    }
-                )
-            }
-            links.photoLinks.forEach { photoLink ->
-                Text(
-                    text = photoLink,
-                    modifier = Modifier.clickable {
-                        // Handle click
-                    }
-                )
-            }
+    Column {
+        links.videoLinks.forEach { videoLink ->
+            Text(
+                text = videoLink,
+                modifier = Modifier.clickable {
+                    // Handle click
+                }
+            )
         }
-    } else {
-        Text("No data found.")
+        links.photoLinks.forEach { photoLink ->
+            Text(
+                text = photoLink,
+                modifier = Modifier.clickable {
+                    // Handle click
+                }
+            )
+        }
     }
 }
 

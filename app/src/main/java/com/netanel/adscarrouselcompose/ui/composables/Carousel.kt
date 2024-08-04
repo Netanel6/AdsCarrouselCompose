@@ -29,6 +29,8 @@ fun Carousel(links: Links) {
 
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { totalPages })
 
+    var currentVideoIndex by remember { mutableStateOf(-1) }
+
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -42,6 +44,7 @@ fun Carousel(links: Links) {
         if (page < links.videoLinks.size) {
             VideoPlayer(
                 videoLink = links.videoLinks[page],
+                startPlayback =  currentVideoIndex == page,
                 onVideoEnded = {
                     coroutineScope.launch {
                         val nextPage = (pagerState.currentPage + 1) % totalPages

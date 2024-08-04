@@ -11,33 +11,44 @@ import com.google.android.exoplayer2.ui.StyledPlayerView
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun VideoPlayer(videoLink: String, onVideoEnded: () -> Unit, onError: (String) -> Unit) {
+fun VideoPlayer(
+    videoLink: String,
+    startPlayback: Boolean,
+    onVideoEnded: () -> Unit,
+    onError: (String) -> Unit
+) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
     val exoPlayer = remember {
-        ExoPlayer.Builder(context).build()
-    }
-
-    DisposableEffect(exoPlayer) {
-        try {
-            val mediaItem = com.google.android.exoplayer2.MediaItem.fromUri(Uri.parse(videoLink))
-            exoPlayer.setMediaItem(mediaItem)
-            exoPlayer.prepare()
-            exoPlayer.playWhenReady = true
-
-            exoPlayer.addListener(object : Player.Listener {
+        ExoPlayer.Builder(context).build().apply {
+            addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(state: Int) {
                     if (state == Player.STATE_ENDED) {
                         onVideoEnded()
                     }
                 }
             })
-        } catch (e: Exception) {
-            Log.e("ExoPlayerError", "Error setting up video: ${e.message}")
-            onError(e.message ?: "Unknown error")
         }
+    }
 
+    LaunchedEffect(startPlayback) {
+        if (startPlayback) {
+            try {
+                val mediaItem = com.google.android.exoplayer2.MediaItem.fromUri(Uri.parse(videoLink))
+                exoPlayer.setMediaItem(mediaItem)
+                exoPlayer.prepare()
+                exoPlayer.playWhenReady = true
+            } catch (e: Exception) {
+                Log.e("ExoPlayerError", "Error setting up video: ${e.message}")
+                onError(e.message ?: "Unknown error")
+            }
+        } else {
+            exoPlayer.stop()
+            exoPlayer.clearMediaItems()
+        }
+    }
+
+    DisposableEffect(exoPlayer) {
         onDispose {
             exoPlayer.release()
         }
@@ -46,11 +57,11 @@ fun VideoPlayer(videoLink: String, onVideoEnded: () -> Unit, onError: (String) -
     AndroidView(
         factory = {
             StyledPlayerView(it).apply {
-                this.player = exoPlayer
-                this.useController = false // Disable playback controls
-                this.hideController() // Hide the controls
-                this.requestFocus() // Ensure focus
-                this.setBackgroundColor(android.graphics.Color.BLACK) // Optional: set background color
+                player = exoPlayer
+                useController = false // Disable playback controls
+                hideController() // Hide the controls
+                requestFocus() // Ensure focus
+                setBackgroundColor(android.graphics.Color.BLACK) // Optional: set background color
             }
         },
         modifier = Modifier.fillMaxSize(), // Fill the available space
@@ -59,3 +70,4 @@ fun VideoPlayer(videoLink: String, onVideoEnded: () -> Unit, onError: (String) -
         }
     )
 }
+
